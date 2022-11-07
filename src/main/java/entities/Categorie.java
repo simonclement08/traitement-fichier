@@ -24,7 +24,7 @@ public class Categorie {
 	private int id;
 
 	/** Libelle */
-	@Column(name = "LIBELLE", length = 20, nullable = false)
+	@Column(name = "LIBELLE", length = 150, nullable = false)
 	private String libelle;
 
 	/** Liste des produits */

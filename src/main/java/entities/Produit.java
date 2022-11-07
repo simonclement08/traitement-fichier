@@ -1,11 +1,10 @@
 package entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -34,32 +33,35 @@ public class Produit {
 	@JoinColumn(name = "CATEGORIE_ID", nullable = false)
 	private Categorie categorie;
 
-	/** Marque */
-	@ManyToOne
-	@JoinColumn(name = "MARQUE_ID", nullable = false)
-	private Marque marque;
+	/** Liste des marques */
+	@ManyToMany
+	@JoinTable(name="PRODUIT_MARQUE",
+		uniqueConstraints = { @UniqueConstraint(columnNames = {"PRODUIT_ID","MARQUE_ID"}) },
+	    joinColumns= @JoinColumn(name="PRODUIT_ID", referencedColumnName="ID"),
+	    inverseJoinColumns= @JoinColumn(name="MARQUE_ID", referencedColumnName="ID")
+	)
+	private List<Marque> marques = new ArrayList<Marque>();
 
 	/** Libelle */
-	@Column(name = "LIBELLE", length = 20, nullable = false)
+	@Column(name = "LIBELLE", length = 255, nullable = false)
 	private String libelle;
 
 	/** Score nutritionnel */
-	@Column(name = "SCORE_NUTRITIONNEL", nullable = false)
-	@Enumerated(EnumType.STRING)
-	private ScoreNutritionnel scoreNutritionnel;
+	@Column(name = "SCORE_NUTRITIONNEL", length = 1, nullable = false)
+	private String scoreNutritionnel;
 
 	/** Liste des ingredients */
 	@ManyToMany
 	@JoinTable(name="PRODUIT_INGREDIENT",
-		uniqueConstraints = { @UniqueConstraint(columnNames = {"PRODUIT_id","INGREDIENT_ID"}) },
-	    joinColumns= @JoinColumn(name="PRODUIT_id", referencedColumnName="ID"),
+		uniqueConstraints = { @UniqueConstraint(columnNames = {"PRODUIT_ID","INGREDIENT_ID"}) },
+	    joinColumns= @JoinColumn(name="PRODUIT_ID", referencedColumnName="ID"),
 	    inverseJoinColumns= @JoinColumn(name="INGREDIENT_ID", referencedColumnName="ID")
     )
-	private List<Ingredient> ingredients;
+	private List<Ingredient> ingredients = new ArrayList<Ingredient>();
 
 	/** Energie en joules pour 100g */
 	@Column(name = "ENERGIE", nullable = true)
-	private int energie;
+	private double energie;
 
 	/** Quantité de graisse pour 100g */
 	@Column(name = "QUANTITE_GRAISSE", nullable = true)
@@ -72,20 +74,20 @@ public class Produit {
 	/** Liste des allergènes */
 	@ManyToMany
 	@JoinTable(name="PRODUIT_ALLERGENE",
-		uniqueConstraints = { @UniqueConstraint(columnNames = {"PRODUIT_id","ALLERGENE_ID"}) },
-	    joinColumns= @JoinColumn(name="PRODUIT_id", referencedColumnName="ID"),
+		uniqueConstraints = { @UniqueConstraint(columnNames = {"PRODUIT_ID","ALLERGENE_ID"}) },
+	    joinColumns= @JoinColumn(name="PRODUIT_ID", referencedColumnName="ID"),
 	    inverseJoinColumns= @JoinColumn(name="ALLERGENE_ID", referencedColumnName="ID")
 	)
-	private List<Allergene> allergenes;
+	private List<Allergene> allergenes = new ArrayList<Allergene>();
 
 	/** Liste des additifs */
 	@ManyToMany
 	@JoinTable(name="PRODUIT_ADDITIF",
-		uniqueConstraints = { @UniqueConstraint(columnNames = {"PRODUIT_id","ADDITIF_ID"}) },
-	    joinColumns= @JoinColumn(name="PRODUIT_id", referencedColumnName="ID"),
+		uniqueConstraints = { @UniqueConstraint(columnNames = {"PRODUIT_ID","ADDITIF_ID"}) },
+	    joinColumns= @JoinColumn(name="PRODUIT_ID", referencedColumnName="ID"),
 	    inverseJoinColumns= @JoinColumn(name="ADDITIF_ID", referencedColumnName="ID")
 	)
-	private List<Additif> additifs;
+	private List<Additif> additifs = new ArrayList<Additif>();
 
 	public Produit() {
 		super();
@@ -95,14 +97,12 @@ public class Produit {
 	 * Constructeur
 	 *
 	 * @param categorie         Catégorie
-	 * @param marque            Marque
 	 * @param libelle           Libelle
 	 * @param scoreNutritionnel Score nutritionnel
 	 */
-	public Produit(Categorie categorie, Marque marque, String libelle, ScoreNutritionnel scoreNutritionnel) {
+	public Produit(Categorie categorie, String libelle, String scoreNutritionnel) {
 		super();
 		this.categorie = categorie;
-		this.marque = marque;
 		this.libelle = libelle;
 		this.scoreNutritionnel = scoreNutritionnel;
 		this.presenceHuilePalme = false;
@@ -145,21 +145,12 @@ public class Produit {
 	}
 
 	/**
-	 * Getter pour l'attribut marque
+	 * Getter pour l'attribut marques
 	 *
-	 * @return the marque
+	 * @return the marques
 	 */
-	public Marque getMarque() {
-		return marque;
-	}
-
-	/**
-	 * Setter pour l'attribut marque
-	 *
-	 * @param marque the marque to set
-	 */
-	public void setMarque(Marque marque) {
-		this.marque = marque;
+	public List<Marque> getMarques() {
+		return marques;
 	}
 
 	/**
@@ -185,7 +176,7 @@ public class Produit {
 	 *
 	 * @return the scoreNutritionnel
 	 */
-	public ScoreNutritionnel getScoreNutritionnel() {
+	public String getScoreNutritionnel() {
 		return scoreNutritionnel;
 	}
 
@@ -194,7 +185,7 @@ public class Produit {
 	 *
 	 * @param scoreNutritionnel the scoreNutritionnel to set
 	 */
-	public void setScoreNutritionnel(ScoreNutritionnel scoreNutritionnel) {
+	public void setScoreNutritionnel(String scoreNutritionnel) {
 		this.scoreNutritionnel = scoreNutritionnel;
 	}
 
@@ -203,7 +194,7 @@ public class Produit {
 	 *
 	 * @return the energie
 	 */
-	public int getEnergie() {
+	public double getEnergie() {
 		return energie;
 	}
 
@@ -212,7 +203,7 @@ public class Produit {
 	 *
 	 * @param energie the energie to set
 	 */
-	public void setEnergie(int energie) {
+	public void setEnergie(double energie) {
 		this.energie = energie;
 	}
 
